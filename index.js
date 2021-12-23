@@ -24,10 +24,25 @@ let persons = [
   },
 ]
 
+// Get all people
 app.get('/api/persons', (request, response) => {
   response.json(persons)
 })
 
+// Get one person
+app.get("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id)
+
+  const person = persons.find(person => person.id === id)
+
+  if(person) {
+    response.json(person)
+  } else {
+    response.status(404).send("This person not exist")
+  }
+})
+
+// Get more information
 app.get("/api/info", (request, response) => {
   response.send(`
   <div>
