@@ -55,21 +55,32 @@ app.get('/api/info', (request, response) => {
 })
 
 // Create a person
-app.post("/api/persons", (request, response) => {
+app.post('/api/persons', (request, response) => {
   const body = request.body
 
   const newPerson = {
-    id: parseInt(Math.random()*100000),
-    name: body.name,
-    number: body.number,
+    id: parseInt(Math.random() * 100000),
+    name: body.name.trim(),
+    number: body.number.trim(),
+  }
+
+  if (!newPerson.name || !newPerson.number) {
+    return response
+      .status(400)
+      .send({ error: 'You should complete all inputs' })
+  }
+
+  const findPerson = persons.find((person) => person.name === newPerson.name)
+  if (findPerson) {
+    return response.status(400).json({ error: 'Name must be unique' })
   }
 
   const newPeople = persons.concat(newPerson)
   persons = newPeople
 
-  console.log(persons)
-
-  response.status(200).json(`${newPerson.name} was created successfully`)
+  response
+    .status(200)
+    .json({ message: 'Person created successfully', person: newPerson })
 })
 
 // Delete a person
