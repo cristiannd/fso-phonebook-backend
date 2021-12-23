@@ -30,26 +30,42 @@ app.get('/api/persons', (request, response) => {
 })
 
 // Get one person
-app.get("/api/persons/:id", (request, response) => {
+app.get('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id)
 
-  const person = persons.find(person => person.id === id)
+  const person = persons.find((person) => person.id === id)
 
-  if(person) {
+  if (person) {
     response.json(person)
   } else {
-    response.status(404).send("This person not exist")
+    response.status(404).send('This person not exist')
   }
 })
 
 // Get more information
-app.get("/api/info", (request, response) => {
+app.get('/api/info', (request, response) => {
   response.send(`
   <div>
     Phonebook has info for ${persons.length} people
     ${new Date()}
   <div/>
   `)
+})
+
+app.delete('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id)
+
+  const personToDelete = persons.find((person) => person.id === id)
+
+  if (personToDelete) {
+    const personsFilter = persons.filter((person) => person.id !== id)
+    persons = personsFilter
+    response
+      .status(200)
+      .send(`${personToDelete.name} has been successfully removed`)
+  } else {
+    response.status(404).send('This person not exist')
+  }
 })
 
 const PORT = 3001
