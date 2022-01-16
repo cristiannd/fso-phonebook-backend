@@ -4,6 +4,7 @@ const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
+const { update } = require('./models/person')
 
 app.use(express.static('build'))
 app.use(cors())
@@ -17,7 +18,7 @@ app.use(
 // Get all people
 app.get('/api/persons', (request, response, next) => {
   Person.find({})
-    .then((person) => response.json(person))
+    .then((people) => response.json(people))
     .catch((error) => next(error))
 })
 
@@ -26,6 +27,11 @@ app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then((person) => response.json(person))
     .catch((error) => next(error))
+})
+
+// Get info
+app.get('/api/info', (request, response, next) => {
+  Person.find({}).then(people => response.status(200).send(`There are ${people.length} people registrated`))
 })
 
 // Create a person
@@ -54,6 +60,22 @@ app.delete('/api/persons/:id', (request, response, next) => {
     .then((res) => {
       console.log('Person deleted')
       response.status(204).end()
+    })
+    .catch((error) => next(error))
+})
+
+// Update a person
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+
+  const person = {
+    name: body.name,
+    number: body.number,
+  }
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then((updatedPerson) => {
+      response.json(updatedPerson)
     })
     .catch((error) => next(error))
 })
