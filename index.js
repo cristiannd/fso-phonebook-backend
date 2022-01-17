@@ -91,7 +91,13 @@ const errorHandler = (error, request, response, next) => {
   }
 
   if (error.name === 'ValidationError') {
-    return response.status(400).send({ error: 'Input name and input number must be unique'})
+    if (error.errors[Object.keys(error.errors)[0]].properties.type === 'minlength') {
+      return response.status(400).send({ error: `Min length in the input ${error.errors[Object.keys(error.errors)[0]].properties.path} is ${error.errors[Object.keys(error.errors)[0]].properties.minlength}` })
+    }
+
+    if(error.errors[Object.keys(error.errors)[0]].properties.type === 'unique') {
+      return response.status(400).send({ error: `Input ${error.errors[Object.keys(error.errors)[0]].properties.path} must be unique`})
+    }
   }
 
   next(error)
