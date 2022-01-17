@@ -4,7 +4,6 @@ const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
-const { update } = require('./models/person')
 
 app.use(express.static('build'))
 app.use(cors())
@@ -31,11 +30,13 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 // Get info
 app.get('/api/info', (request, response, next) => {
-  Person.find({}).then(people => response.status(200).send(`There are ${people.length} people registrated`))
+  Person.find({}).then((people) =>
+    response.status(200).send(`There are ${people.length} people registrated`)
+  )
 })
 
 // Create a person
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   const newPerson = new Person({
@@ -49,9 +50,12 @@ app.post('/api/persons', (request, response) => {
       .send({ error: 'You should complete all inputs' })
   }
 
-  newPerson.save().then((personSave) => {
-    response.json(personSave)
-  })
+  newPerson
+    .save()
+    .then((personSave) => {
+      response.json(personSave)
+    })
+    .catch((error) => next(error))
 })
 
 // Delete a person
@@ -84,6 +88,10 @@ app.put('/api/persons/:id', (request, response, next) => {
 const errorHandler = (error, request, response, next) => {
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'Malformatted id' })
+  }
+
+  if (error.name === 'ValidationError') {
+    return response.status(400).send({ error: 'Input name and input number must be unique'})
   }
 
   next(error)
